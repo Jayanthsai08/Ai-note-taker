@@ -1,5 +1,5 @@
-import { Progress } from '@/components/ui/progress'
-import { Button } from '@/components/ui/button'
+import { Progress } from '../../../components/ui/progress'
+import { Button } from '../../../components/ui/button'
 import { Layout, Shield } from 'lucide-react'
 import Image from 'next/image'
 import React from 'react'

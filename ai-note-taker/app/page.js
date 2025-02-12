@@ -1,6 +1,6 @@
 "use client"
-import { Button } from "@/components/ui/button";
-import { api } from "@/convex/_generated/api";
+import { Button } from "../components/ui/button";
+import { api } from "../convex/_generated/api";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
 import Image from "next/image";

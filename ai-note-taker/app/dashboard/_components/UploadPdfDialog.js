@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Input } from "../../../components/ui/input"
+import { Button } from "../../../components/ui/button"
 import {
     Dialog,
     DialogContent,
@@ -11,12 +11,13 @@ import {
     DialogClose,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog"
+} from "../../../components/ui/dialog"
 import { Loader2Icon } from 'lucide-react'
-import { useMutation } from 'convex/react'
+import { useAction, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import uuid4 from 'uuid4'
 import { useUser } from '@clerk/nextjs'
+import axios from 'axios'
 
 function UploadPdfDialog({ children }) {
 
@@ -26,7 +27,9 @@ function UploadPdfDialog({ children }) {
     const getFileUrl=useMutation(api.fileStorage.getFileUrl)
     const [file, setFile] = useState();
     const [fileName,setFileName]=useState();
+    const embeddDocument = useAction(api.myAction.ingest)
     const [loading, setLoading] = useState(false)
+    const [open,setOpen]=useState(false)
 
     const OnFileSelect = (event) => {
         setFile(event.target.files[0]);
@@ -36,7 +39,7 @@ function UploadPdfDialog({ children }) {
         setLoading(true);
 
         // Getting a short-lived upload URL
-        const postUrl = await generateUploadUrl();
+         const postUrl = await generateUploadUrl();
 
         // POST the file to the URL
         const result = await fetch(postUrl, {
@@ -57,16 +60,26 @@ function UploadPdfDialog({ children }) {
             createdBy:user?.primaryEmailAddress?.emailAddress
           })
 
-          console.log(resp)
-          setLoading(false);
+        //console.log(resp) 
+
+        //Api call to l to fectch PDF processed data
+        const ApiResp = await axios.get('/api/pdf-loader?pdfUrl='+fileUrl)
+        console.log(ApiResp.data.result);
+        await embeddDocument({
+            splitText:ApiResp.data.result,
+            fileId:fileId
+        });
+        //console.log(embeddedResult); 
+        setLoading(false);
+        setOpen(false);
 
 
     }
 
     return (
-        <Dialog>
+        <Dialog open={open}>
             <DialogTrigger asChild>
-                {children}
+                <Button onClick={()=>setOpen(true)} className='w-full'>+ Upload PDF File</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -88,7 +101,7 @@ function UploadPdfDialog({ children }) {
                     </DialogDescription>
                 </DialogHeader>
                 <div className='flex gap-3 ml-4 justify-end'>
-                    <Button onClick={OnUpload}>
+                    <Button onClick={OnUpload} disabled={loading    }>
                         {loading ?
                             <Loader2Icon className='animate-spin' /> :
                             'Upload'
