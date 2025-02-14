@@ -4,7 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import TextStyle from '@tiptap/extension-text-style';
-import Highlight from '@tiptap/extension-highlight'// ✅ Import Highlight
+import Highlight from '@tiptap/extension-highlight';
 import EditorExtension from './EditorExtension';
 
 function TextEditor() {
@@ -28,7 +28,7 @@ function TextEditor() {
             StarterKit,
             Underline,
             FontSize,
-            Highlight.configure({ multicolor: true }), //  Enable Highlighting
+            Highlight.configure({ multicolor: true }),
             Placeholder.configure({
                 placeholder: 'Start taking your Notes here...'
             }),

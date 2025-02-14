@@ -1,8 +1,14 @@
+import { useAction } from 'convex/react';
 import { Bold, Italic, Code, Underline, ArrowUp, ArrowDown, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Highlighter, Sparkles } from 'lucide-react';
 import React from 'react';
+import { api } from '../../../convex/_generated/api';
+import { useParams } from 'next/navigation';
+import { chatSession } from '../../../configs/AIModel';
+
 
 function EditorExtension({ editor }) {
 
+  const {fileId} = useParams();
   const increaseFontSize = () => {
     const currentSize = parseInt(editor.getAttributes('textStyle').fontSize || '16', 10);
     editor.chain().focus().setMark('textStyle', { fontSize: `${currentSize + 2}px` }).run();
@@ -15,16 +21,36 @@ function EditorExtension({ editor }) {
     }
   };
 
-  const onAiClick=()=>{
+  const SearchAI=useAction(api.myAction.search)
+
+  const onAiClick=async()=>{
     const selectedText=editor.state.doc.textBetween(
       editor.state.selection.from,
       editor.state.selection.to,
       ' '
     );
     console.log('selected Text:',selectedText);
+
+    const result = await SearchAI({
+      query:selectedText,
+      fileId:fileId
+    })
+    
+    const UnformattedAns = JSON.parse(result);
+    let AllUnformattedAns='';
+
+    UnformattedAns&&UnformattedAns.forEach(item=>{
+      AllUnformattedAns=AllUnformattedAns + item.pageContent
+    });
+ 
+    console.log(AllUnformattedAns);
+    const PROMPT ="For question :"+selectedText+" and with the given content as answer,"+"please give an appropriate adequately detailed answer by consolidating all the ideas a in HTML format. The answer content is:" + AllUnformattedAns;
+
+    const AiModelResult=await chatSession.sendMessage(PROMPT);
+    console.log(AiModelResult.response.text());
   }
 
-  return editor && (
+  return editor&&(
     <div className='p-5'>
       <div className="control-group">
         <div className="button-group flex gap-3 relative">
